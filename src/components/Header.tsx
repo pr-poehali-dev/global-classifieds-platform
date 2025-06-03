@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,9 @@ interface HeaderProps {
   currentLanguage: string;
   onCountryChange: (country: string) => void;
   onLanguageChange: (language: string) => void;
+  user?: any;
+  onShowAuth: () => void;
+  onShowCreateListing: () => void;
 }
 
 const Header = ({
@@ -21,6 +25,9 @@ const Header = ({
   currentLanguage,
   onCountryChange,
   onLanguageChange,
+  user,
+  onShowAuth,
+  onShowCreateListing,
 }: HeaderProps) => {
   const t =
     TRANSLATIONS[currentLanguage as keyof typeof TRANSLATIONS] ||
@@ -33,7 +40,7 @@ const Header = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-primary to-blue-500 rounded-lg flex items-center justify-center">
               <Icon name="Globe" className="text-white" size={24} />
             </div>
@@ -41,19 +48,30 @@ const Header = ({
               <h1 className="text-2xl font-bold text-gray-900">WorldMarket</h1>
               <p className="text-xs text-gray-500">Global Marketplace</p>
             </div>
-          </div>
+          </Link>
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Button variant="ghost" className="flex items-center space-x-2">
-              <Icon name="Home" size={18} />
-              <span>{t.home}</span>
-            </Button>
+            <Link to="/">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <Icon name="Home" size={18} />
+                <span>{t.home}</span>
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <Icon name="Info" size={18} />
+                <span>{currentLanguage === "ru" ? "О нас" : "About"}</span>
+              </Button>
+            </Link>
             <Button variant="ghost" className="flex items-center space-x-2">
               <Icon name="Heart" size={18} />
               <span>{t.favorites}</span>
             </Button>
-            <Button className="flex items-center space-x-2 bg-primary hover:bg-primary/90">
+            <Button
+              onClick={onShowCreateListing}
+              className="flex items-center space-x-2 bg-primary hover:bg-primary/90"
+            >
               <Icon name="Plus" size={18} />
               <span>{t.newListing}</span>
             </Button>
@@ -98,9 +116,38 @@ const Header = ({
             </DropdownMenu>
 
             {/* Profile */}
-            <Button variant="outline" size="icon">
-              <Icon name="User" size={18} />
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                  >
+                    <Icon name="User" size={18} />
+                    <span className="hidden sm:inline">{user.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>
+                    <Icon name="User" size={16} className="mr-2" />
+                    {t.profile}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Icon name="Settings" size={16} className="mr-2" />
+                    {currentLanguage === "ru" ? "Настройки" : "Settings"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Icon name="LogOut" size={16} className="mr-2" />
+                    {currentLanguage === "ru" ? "Выйти" : "Logout"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button onClick={onShowAuth} variant="outline">
+                <Icon name="User" size={18} className="mr-2" />
+                {currentLanguage === "ru" ? "Войти" : "Login"}
+              </Button>
+            )}
           </div>
         </div>
       </div>

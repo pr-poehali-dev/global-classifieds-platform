@@ -3,11 +3,37 @@ import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import CategoryGrid from "@/components/CategoryGrid";
 import FeaturedListings from "@/components/FeaturedListings";
-import { COUNTRIES, TRANSLATIONS } from "@/types/global";
+import AuthModal from "@/components/AuthModal";
+import CreateListingModal from "@/components/CreateListingModal";
+import { COUNTRIES, TRANSLATIONS, Listing } from "@/types/global";
 
-const Index = () => {
-  const [currentCountry, setCurrentCountry] = useState("RU");
-  const [currentLanguage, setCurrentLanguage] = useState("ru");
+interface IndexProps {
+  currentCountry: string;
+  currentLanguage: string;
+  user: any;
+  listings: Listing[];
+  onCountryChange: (country: string) => void;
+  onLanguageChange: (language: string) => void;
+  onLogin: (email: string, password: string) => void;
+  onRegister: (name: string, email: string, password: string) => void;
+  onCreateListing: (listing: any) => void;
+  onFavoriteClick: (id: string) => void;
+}
+
+const Index = ({
+  currentCountry,
+  currentLanguage,
+  user,
+  listings,
+  onCountryChange,
+  onLanguageChange,
+  onLogin,
+  onRegister,
+  onCreateListing,
+  onFavoriteClick,
+}: IndexProps) => {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showCreateListingModal, setShowCreateListingModal] = useState(false);
 
   const country =
     COUNTRIES.find((c) => c.code === currentCountry) || COUNTRIES[0];
@@ -17,12 +43,18 @@ const Index = () => {
 
   const handleSearch = (query: string, category: string, location: string) => {
     console.log("Search:", { query, category, location });
-    // Здесь будет логика поиска
   };
 
   const handleCategoryClick = (categoryId: string) => {
-    console.log("Category clicked:", categoryId);
-    // Здесь будет переход к странице категории
+    window.location.href = `/category/${categoryId}`;
+  };
+
+  const handleShowCreateListing = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    setShowCreateListingModal(true);
   };
 
   return (
@@ -31,8 +63,11 @@ const Index = () => {
       <Header
         currentCountry={currentCountry}
         currentLanguage={currentLanguage}
-        onCountryChange={setCurrentCountry}
-        onLanguageChange={setCurrentLanguage}
+        onCountryChange={onCountryChange}
+        onLanguageChange={onLanguageChange}
+        user={user}
+        onShowAuth={() => setShowAuthModal(true)}
+        onShowCreateListing={handleShowCreateListing}
       />
 
       {/* Hero Section */}
@@ -49,8 +84,8 @@ const Index = () => {
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               <span>
                 {currentLanguage === "ru"
-                  ? "2.4M+ объявлений"
-                  : "2.4M+ listings"}
+                  ? `${listings.length}+ объявлений`
+                  : `${listings.length}+ listings`}
               </span>
             </div>
             <div className="flex items-center space-x-2">
@@ -84,6 +119,8 @@ const Index = () => {
       <FeaturedListings
         language={currentLanguage}
         currency={country.currencySymbol}
+        listings={listings.slice(0, 6)}
+        onFavoriteClick={onFavoriteClick}
       />
 
       {/* Footer */}
@@ -195,6 +232,23 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Modals */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        language={currentLanguage}
+        onLogin={onLogin}
+        onRegister={onRegister}
+      />
+
+      <CreateListingModal
+        isOpen={showCreateListingModal}
+        onClose={() => setShowCreateListingModal(false)}
+        language={currentLanguage}
+        currency={country.currencySymbol}
+        onCreateListing={onCreateListing}
+      />
     </div>
   );
 };
